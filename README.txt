@@ -115,8 +115,7 @@ Here are some points I consider working on at some point:
 	working some way to compute the matrix generator of the matrix sequence through some
 	algorithm (matrix Berlekamp-Massey or some other).
 
-- I have to make the linear algebra step more parallel. Even though it is the fastest of the
-	two main steps of the algorithm, no one likes to wait if it is possible to faster.
+- I have to make the linear algebra step more parallel.
 
 Here are the next steps:
 
