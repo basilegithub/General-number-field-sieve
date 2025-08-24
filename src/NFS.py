@@ -172,13 +172,14 @@ def NFS(n):
         matrix = build_dense_matrix(pairs_used, primes, R_p, Q, divide_leading)
         length = len(matrix[0])
         matrix, N, U = siqs_build_matrix_opt(matrix)
+        log.write_log(LOG_PATH, "matrix built "+str(len(matrix))+"x"+str(len(pairs_used))+" finding kernel...")
     else:
         matrix = build_sparse_matrix(pairs_used,primes,R_p,Q,divide_leading)
         matrix = transpose_sparse(matrix, V)
-    log.write_log(LOG_PATH, "matrix built "+str(len(pairs_used))+"x"+str(V)+" reducing...")
-    #if not flag_gaussian_pivot:
-    #    matrix,pairs_used = reduce_sparse_matrix(matrix,pairs_used)
-    log.write_log(LOG_PATH, "matrix built "+str(len(pairs_used))+"x"+str(V)+" finding kernel...")
+        log.write_log(LOG_PATH, "matrix built "+str(len(matrix))+"x"+str(len(pairs_used))+" reducing...")
+    if not flag_gaussian_pivot:
+        matrix, pairs_used = reduce_sparse_matrix(matrix, pairs_used)
+        log.write_log(LOG_PATH, "matrix built "+str(len(matrix))+"x"+str(len(pairs_used))+" finding kernel...")
 
     time_1 = datetime.now()
 
