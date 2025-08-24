@@ -121,6 +121,4 @@ Here are the next steps:
 
 - Some optimizations may be possible here and there, but I have already a big amount of work to
 	get fast code. The next step on this topic is switching to C. Python is intrisically
-	limited on the topic of speed, as it is compiled on the fly. Just like this project,
-	I have already done part of the C project a while ago. I have to rework it to get
-	something on the same level of quality as this Python version.
+	limited on the topic of speed, as it is compiled on the fly.
