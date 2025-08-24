@@ -103,10 +103,6 @@ Here are some points I consider working on at some point:
 - I have to implement the Montgomery algorithm for the algebraic square root computation.
 	For the small numbers I have used my algorithm on, it is not a bottleneck yet.
 
-- I have to optimize the Union-find algorithm for cycle detection, the version I have right now
-	does not seem to be perfect, as I still do many operations to connect two distinct
-	connected components.
-
 - No matter how hard I tried, I am stuck on understanding the block Wiedemann algorithm. For
 	now, the best I can do is the scalar one, with some optimizations. Namely, I use binary
 	encoding of the blocks of vectors to compute matrix-vector product very efficiently.

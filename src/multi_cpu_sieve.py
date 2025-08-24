@@ -45,9 +45,7 @@ def siever(b_queue, tmp_pairs, f_x, primes, R_p, prod_primes, m0, m1, d, b, M, l
 def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leading, prod_primes, pow_div, pairs_used,
                    const1, const2, logs, m0, m1, M, d, n, flag_use_batch_smooth_test, LOG_PATH, NB_CPU):
     fp, pf = {}, {}
-    connected_components_fp, connected_components_pf = {}, {}
-    node_component_fp, node_component_pf = {}, {}
-    index_component_fp, index_component_pf = 0, 0
+    parent_fp, parent_pf = {}, {}
     full_found = 0
     partial_found_fp, partial_found_pf = 0, 0
     size_fp, size_pf = 0, 0
@@ -100,10 +98,10 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
                             full_found += 1
 
                         elif z[4] > 1 and z[2] == 1:
-                            pairs_used, fp, graph_fp, size_fp, index_component_fp, cycle_len, full_found, partial_found_fp = handle_large_fp(tmp,z,pairs_used,fp,graph_fp,size_fp,connected_components_fp,node_component_fp,index_component_fp,g,divide_leading,cycle_len,full_found,partial_found_fp)
+                            pairs_used, fp, graph_fp, size_fp, parent_fp, cycle_len, full_found, partial_found_fp = handle_large_fp(tmp,z,pairs_used,fp,graph_fp,size_fp,parent_fp,g,divide_leading,cycle_len,full_found,partial_found_fp)
 
                         elif z[4] == 1 and z[2] > 1:
-                            pairs_used, pf, graph_pf, size_pf, index_component_pf, cycle_len, full_found, partial_found_pf = handle_large_pf(tmp, z, pairs_used, pf, graph_pf, size_pf, connected_components_pf, node_component_pf, index_component_pf, g, divide_leading, cycle_len, full_found, partial_found_pf)
+                            pairs_used, pf, graph_pf, size_pf, parent_pf, cycle_len, full_found, partial_found_pf = handle_large_pf(tmp, z, pairs_used, pf, graph_pf, size_pf, parent_pf, g, divide_leading, cycle_len, full_found, partial_found_pf)
 
                 sys.stdout.write('\r'+"b = "+str(b)+" "+str(len(pairs_used))+"/("+str(V)+"+10) ; full relations = "+str(full_found)+" | partial found fp = "+str(partial_found_fp)+" ("+str(size_fp)+") | partial found pf = "+str(partial_found_pf)+" ("+str(size_pf)+")")
 

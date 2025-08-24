@@ -85,7 +85,7 @@ def combine_fp(pair, pairs_used, fp, path, divide_leading, g):
     pairs_used.append(tmp)
     
 # Master function, keeps the partial_relations and possible_smooth lists sorted, find the matching large primes, create the full relations from large primes
-def handle_large_fp(pair, large_primes, pairs_used, fp, graph_fp, size_fp, connected_components_fp, node_component_fp, index_component_fp, g, divide_leading, cycle_len, full_found, partial_found_fp):
+def handle_large_fp(pair, large_primes, pairs_used, fp, graph_fp, size_fp, parent_fp, g, divide_leading, cycle_len, full_found, partial_found_fp):
     pair[4] = [large_primes[3]]
 
     if large_primes[3] == large_primes[4]:
@@ -94,98 +94,104 @@ def handle_large_fp(pair, large_primes, pairs_used, fp, graph_fp, size_fp, conne
 
     elif not bool(fp):
         pair[4].append(large_primes[4])
-        fp[large_primes[3]] = {}
-        fp[large_primes[3]][large_primes[4]] = pair
 
-        graph_fp[large_primes[3]] = [large_primes[4]]
-        graph_fp[large_primes[4]] = [large_primes[3]]
+        small_p, big_p = large_primes[3], large_primes[4]
 
-        connected_components_fp[index_component_fp] = set((large_primes[3], large_primes[4]))
-        node_component_fp[large_primes[3]] = index_component_fp
-        node_component_fp[large_primes[4]] = index_component_fp
+        fp[small_p] = {}
+        fp[small_p][big_p] = pair
+
+        graph_fp[small_p] = [big_p]
+        graph_fp[big_p] = [small_p]
+
+        parent_fp[small_p] = small_p
+        parent_fp[big_p] = small_p
 
         size_fp += 1
-        index_component_fp += 1
 
     else:
-        flag_small_prime = large_primes[3] in graph_fp
+        small_p, big_p = large_primes[3], large_primes[4]
+
+        flag_small_prime = small_p in graph_fp
         
         # If the smallest prime has not already been seen
         if not flag_small_prime:
-            graph_fp[large_primes[3]] = [large_primes[4]]
+            graph_fp[small_p] = [big_p]
 
             # Find where in partial relations it is needed to insert the new partial relation
-            pair[4].append(large_primes[4])
-            fp[large_primes[3]] = {}
-            fp[large_primes[3]][large_primes[4]] = pair
+            pair[4].append(big_p)
+
+            fp[small_p] = {}
+            fp[small_p][big_p] = pair
 
             size_fp += 1
             
             # Find if largest prime has already been seen
-            flag_big_prime = large_primes[4] in graph_fp
+            flag_big_prime = big_p in graph_fp
 
             if flag_big_prime: # if seen add the smallest prime to the list of links of the largest prime
-                graph_fp[large_primes[4]].append(large_primes[3])
+                graph_fp[big_p].append(small_p)
 
-                connected_components_fp[node_component_fp[large_primes[4]]].add(large_primes[3])
-                node_component_fp[large_primes[3]] = node_component_fp[large_primes[4]]
+                parent_fp[small_p] = parent_fp[big_p]
+
             else: # If it has not been seen, append it
-                graph_fp[large_primes[4]] = [large_primes[3]]
+                graph_fp[big_p] = [small_p]
 
-                connected_components_fp[index_component_fp] = set((large_primes[3], large_primes[4]))
-                node_component_fp[large_primes[3]] = index_component_fp
-                node_component_fp[large_primes[4]] = index_component_fp
-                index_component_fp += 1
+                parent_fp[small_p] = small_p
+                parent_fp[big_p] = small_p
             
         # If the smallest prime has already been seen
         else:
-            flag_big_prime = large_primes[4] in graph_fp
+            flag_big_prime = big_p in graph_fp
             
             # If big prime has not been seen
             if not flag_big_prime:
-                graph_fp[large_primes[3]].append(large_primes[4]) # Append the largest prime to the list of links of the smallest prime
-                graph_fp[large_primes[4]] = [large_primes[3]] # Create the large prime in the graph
+                graph_fp[small_p].append(big_p) # Append the largest prime to the list of links of the smallest prime
+                graph_fp[big_p] = [small_p] # Create the large prime in the graph
 
-                connected_components_fp[node_component_fp[large_primes[3]]].add(large_primes[4])
-                node_component_fp[large_primes[4]] = node_component_fp[large_primes[3]]
+                parent_fp[big_p] = parent_fp[small_p]
 
-
-                pair[4].append(large_primes[4])
+                pair[4].append(big_p)
                 # Find where to insert the partial relation
-                if large_primes[3] not in fp:
-                    fp[large_primes[3]] = {}
+                if small_p not in fp:
+                    fp[small_p] = {}
 
-                fp[large_primes[3]][large_primes[4]] = pair
+                fp[small_p][big_p] = pair
 
                 size_fp += 1
 
             # If the largest prime has been seen, ie if both primes have already been seen
             else:
-                if node_component_fp[large_primes[3]] != node_component_fp[large_primes[4]]:
-                    graph_fp[large_primes[3]].append(large_primes[4])
-                    graph_fp[large_primes[4]].append(large_primes[3])
 
-                    connected_components_fp[node_component_fp[large_primes[3]]] = connected_components_fp[node_component_fp[large_primes[3]]].union(connected_components_fp[node_component_fp[large_primes[4]]])
+                parent_small_p = parent_fp[small_p]
+                while parent_fp[parent_small_p] != parent_small_p:
+                    parent_fp[parent_small_p], parent_small_p = parent_fp[parent_fp[parent_small_p]], parent_fp[parent_small_p]
 
-                    for node in connected_components_fp[node_component_fp[large_primes[4]]]:
-                        node_component_fp[node] = node_component_fp[large_primes[3]]
+                parent_big_p = parent_fp[big_p]
+                while parent_fp[parent_big_p] != parent_big_p:
+                    parent_fp[parent_big_p], parent_big_p = parent_fp[parent_fp[parent_big_p]], parent_fp[parent_big_p]
 
-                    pair[4].append(large_primes[4])
+                if parent_small_p != parent_big_p:
+                    graph_fp[small_p].append(big_p)
+                    graph_fp[big_p].append(small_p)
+
+                    parent_fp[parent_big_p] = parent_small_p
+
+                    pair[4].append(big_p)
                     # Find where to insert the partial relation
-                    if large_primes[3] not in fp:
-                        fp[large_primes[3]] = {}
+                    if small_p not in fp:
+                        fp[small_p] = {}
                         
-                    fp[large_primes[3]][large_primes[4]] = pair
+                    fp[small_p][big_p] = pair
 
                     size_fp += 1
                 else:
-                    path_cycle = find_cycle_fp(graph_fp, large_primes[3:5])
+                    path_cycle = find_cycle_fp(graph_fp, [small_p, big_p])
                     if len(path_cycle) < 11: cycle_len[len(path_cycle)-2] += 1
                     else: cycle_len[-1] += 1
                     combine_fp(pair,pairs_used,fp,path_cycle,divide_leading,g)
                     partial_found_fp += 1
 
-    return pairs_used, fp, graph_fp, size_fp, index_component_fp, cycle_len, full_found, partial_found_fp
+    return pairs_used, fp, graph_fp, size_fp, parent_fp, cycle_len, full_found, partial_found_fp
 
 def find_cycle_pf(graph, init):
     if init[0] == (1, 1): return DFS_pf(graph, init)
@@ -278,7 +284,7 @@ def combine_pf(pair, pairs_used, pf, path, divide_leading, g):
 
     pairs_used.append(tmp)
 
-def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, connected_components_pf, node_component_pf, index_component_pf, g, divide_leading, cycle_len, full_found, partial_found_pf):
+def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, parent_pf, g, divide_leading, cycle_len, full_found, partial_found_pf):
     if large_primes[1] == 1:
         tmp = (1, 1) # [smallest_prime, r_smallest]
         pair[2] = [tmp]
@@ -303,10 +309,8 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, conne
         graph_pf[tmp2] = {}
         graph_pf[tmp2][tmp[0]] = [tmp]
 
-        connected_components_pf[index_component_pf] = set((tmp, tmp2))
-        node_component_pf[tmp] = index_component_pf
-        node_component_pf[tmp2] = index_component_pf
-        index_component_pf += 1
+        parent_pf[tmp] = tmp
+        parent_pf[tmp2] = tmp
 
     else:
         flag_small_prime = tmp in graph_pf
@@ -329,17 +333,14 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, conne
                 else:
                     graph_pf[tmp2][tmp[0]] = [tmp]
 
-                connected_components_pf[node_component_pf[tmp2]].add(tmp)
-                node_component_pf[tmp] = node_component_pf[tmp2]
+                parent_pf[tmp] = tmp2
 
             else: # If it has not been seen, create it in the graph
                 graph_pf[tmp2] = {}
                 graph_pf[tmp2][tmp[0]] = [tmp]
-                
-                connected_components_pf[index_component_pf] = set((tmp, tmp2))
-                node_component_pf[tmp] = index_component_pf
-                node_component_pf[tmp2] = index_component_pf
-                index_component_pf += 1
+
+                parent_pf[tmp] = tmp
+                parent_pf[tmp2] = tmp
 
         # If [smallest_prime, r_smallest] has already be seen
         # We look for [largest_prime, r_largest]
@@ -355,8 +356,7 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, conne
                 graph_pf[tmp2] = {}
                 graph_pf[tmp2][tmp[0]] = [tmp] # Create the large prime in the graph
 
-                connected_components_pf[node_component_pf[tmp]].add(tmp2)
-                node_component_pf[tmp2] = node_component_pf[tmp]
+                parent_pf[tmp2] = tmp
 
                 pair[2].append(tmp2)
                 # Find where to insert the partial relation
@@ -368,7 +368,15 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, conne
                 size_pf += 1
 
             else:
-                if node_component_pf[tmp] != node_component_pf[tmp2]:
+                parent_tmp = parent_pf[tmp]
+                while parent_pf[parent_tmp] != parent_tmp:
+                    parent_pf[parent_tmp], parent_tmp = parent_pf[parent_pf[parent_tmp]], parent_pf[parent_tmp]
+
+                parent_tmp2 = parent_pf[tmp2]
+                while parent_pf[parent_tmp2] != parent_tmp2:
+                    parent_pf[parent_tmp2], parent_tmp2 = parent_pf[parent_pf[parent_tmp2]], parent_pf[parent_tmp2]
+
+                if parent_tmp != parent_tmp2:
                     if tmp2[0] in graph_pf[tmp]:
                         graph_pf[tmp][tmp2[0]].append(tmp2)
                     else:
@@ -379,10 +387,7 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, conne
                     else:
                         graph_pf[tmp2][tmp[0]] = [tmp]
 
-                    connected_components_pf[node_component_pf[tmp]] = connected_components_pf[node_component_pf[tmp]].union(connected_components_pf[node_component_pf[tmp2]])
-
-                    for node in connected_components_pf[node_component_pf[tmp2]]:
-                        node_component_pf[node] = node_component_pf[tmp]
+                    parent_pf[parent_tmp2] = parent_tmp
 
                     pair[2].append(tmp2)
 
@@ -395,10 +400,9 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, conne
 
                 else:
                     path_cycle = find_cycle_pf(graph_pf, [tmp, tmp2])
-                    #path_cycle = DFS_pf(graph_pf,[tmp, tmp2])
                     if len(path_cycle) < 11: cycle_len[len(path_cycle)-2] += 1
                     else: cycle_len[-1] += 1
                     combine_pf(pair,pairs_used,pf,path_cycle,divide_leading,g)
                     partial_found_pf += 1
 
-    return pairs_used, pf, graph_pf, size_pf, index_component_pf, cycle_len, full_found, partial_found_pf
+    return pairs_used, pf, graph_pf, size_pf, parent_pf, cycle_len, full_found, partial_found_pf

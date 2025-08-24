@@ -167,7 +167,7 @@ def compute_factors(pairs_used, vec, n, primes, f_x, g, g_prime, g_prime_sq, g_p
     else:
         x,y = create_solution(pairs_used,vec,n,len(primes),primes,g,g_prime,m0,m1,inert_set[-1],g_prime_sq,leading_coeff,g_prime_eval,2*M)
     
-    print(math.gcd(x-y,n), math.gcd(x+y,n))
+    # print(math.gcd(x-y,n), math.gcd(x+y,n))
 
     if x != y and math.gcd(x-y,n) != 1 and math.gcd(x+y,n) != 1:
         print_final_message(x, y, n, time_1, LOG_PATH)
