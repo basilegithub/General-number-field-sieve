@@ -53,7 +53,7 @@ def build_sparse_matrix(pairs,rat,alg,qua,div_lead):
             index += 1
             
         if r[6]&1: line.append(index)
-        matrix.append(line)
+        matrix.append(set(line))
     return matrix
     
 # Reduce the sparse matrix, according to various rules:
@@ -64,42 +64,69 @@ def reduce_sparse_matrix(matrix, pairs):
     flag = True
     while flag:
         flag = False
-        i = 0
-        while i < len(matrix):
-            if len(matrix[i]) == 1:
-                flag = True
-                coeff = matrix[i][0]
-                for j in range(len(matrix)):
-                    if j != i:
-                        stored = -1
-                        for z in range(len(matrix[j])):
-                            if matrix[j][z] == coeff: stored = z
-                            elif matrix[j][z] > coeff: matrix[j][z] -= 1
-                        if stored > -1: del matrix[j][stored]
-                del pairs[coeff]
-                del matrix[i]
-            else: i += 1
-        i = 0
-        while i < len(matrix):
-            if matrix[i] == []:
-                del matrix[i]
-                flag = True
-            else: i += 1
 
-        length = len(matrix)+10
-        pairs = pairs[:length]
-        
-        for i in range(len(matrix)):
-            if matrix[i][0] >= length:
-                flag = True
-                matrix[i] = []
+        singleton_queue = [index for index, row in enumerate(matrix) if len(row) == 1]
+        active_cols = set(range(len(pairs)))
+
+        flag = len(singleton_queue)
+
+        while singleton_queue:
+            index = singleton_queue.pop()
+
+            if len(matrix[index]) != 1: continue
+            coeff = next(iter(matrix[index]))
+
+            for j, row in enumerate(matrix):
+                if j != index and coeff in row:
+                        row.remove(coeff)
+                        if len(row) == 1: singleton_queue.append(j)
+
+            matrix[index].clear()
+            active_cols.discard(coeff)
+
+        matrix = [row for row in matrix if row]
+
+        pairs = [pairs[index] for index in sorted(active_cols)]
+
+        mapping = {old: new for new, old in enumerate(sorted(active_cols))}
+        matrix = [{mapping[c] for c in row if c in mapping} for row in matrix]
+
+        active_cols = set(range(len(pairs)))
+        target_n_cols = len(matrix)+10
+        to_delete = len(pairs) - target_n_cols
+        current_len_row = 2
+
+        while to_delete >= current_len_row-1:
+
+            index = -1
+            for i in range(len(matrix)):
+                if len(matrix[i]) == current_len_row:
+                    flag = True
+                    index = i
+                    break
+
+            if index != -1:
+                for coeff in matrix[index]:
+                    active_cols.discard(coeff)
+
+                    for j, row in enumerate(matrix):
+                        if j != index and coeff in row:
+                            row.discard(coeff)
+
+                to_delete -= current_len_row-1
+
+                matrix[index].clear()
+
             else:
-                for j in range(len(matrix[i])):
-                    if matrix[i][-j-1] < length:
-                        if j > 0:
-                            flag = True
-                            matrix[i] = matrix[i][:len(matrix[i])-j]
-                        break
+                current_len_row += 1
+
+        matrix = [row for row in matrix if row]
+
+        pairs = [pairs[index] for index in sorted(active_cols)]
+
+        mapping = {old: new for new, old in enumerate(sorted(active_cols))}
+        matrix = [{mapping[c] for c in row if c in mapping} for row in matrix]
+
     return matrix, pairs
     
 def reduce_matrix(matrix,pairs):

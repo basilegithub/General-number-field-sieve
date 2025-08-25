@@ -229,11 +229,11 @@ def transpose_dense(A, N):
     return B
     
 def transpose_sparse(A, n):
-    A_transpose = [[] for _ in range(n)]
+    A_transpose = [set() for _ in range(n)]
     
     for i in range(len(A)):
         for index in A[i]:
-            A_transpose[index].append(i)
+            A_transpose[index].add(i)
         
     return A_transpose
     
