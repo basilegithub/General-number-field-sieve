@@ -24,10 +24,12 @@ def batch_smooth_test(candidates, prod_primes, cst_1, cst_2, div):
     
     while len(prod_tree[-1]) > 1:
         line = [0]*(len(prod_tree[-1])>>1)
-        for i in range(1,len(prod_tree[-1]),2):
+
+        for i in range(1, len(prod_tree[-1]), 2):
             tmp = prod_tree[-1][i]*prod_tree[-1][i-1]
             if tmp <= prod_primes: line[i>>1] = tmp
             else: line[i>>1] = prod_primes+1
+
         if len(prod_tree[-1]) & 1: line.append(prod_tree[-1][-1])
         prod_tree.append(line)
     
@@ -38,6 +40,7 @@ def batch_smooth_test(candidates, prod_primes, cst_1, cst_2, div):
         for j in range(len(prod_tree[-i-1])-1):
             prod_tree[-i-2][(j<<1)] = prod_tree[-i-1][j]%prod_tree[-i-2][j<<1]
             prod_tree[-i-2][(j<<1)+1] = prod_tree[-i-1][j]%prod_tree[-i-2][(j<<1)+1]
+
         tmp = len(prod_tree[-i-1])-1
         prod_tree[-i-2][tmp<<1] = prod_tree[-i-1][tmp]%prod_tree[-i-2][tmp<<1]
         if (tmp<<1)+1 < len(prod_tree[-i-2]):
@@ -56,8 +59,8 @@ def batch_smooth_test(candidates, prod_primes, cst_1, cst_2, div):
         if not j_1 and not j_2: smooth[i] = [True, 1, 1, 1, 1]
 
         else:
-            tmp_1 = (abs(candidates[i][1])//div)//math.gcd(abs(candidates[i][1]//div),j_1)
-            tmp_2 = abs(candidates[i][3])//math.gcd(abs(candidates[i][3]),j_2)
+            tmp_1 = (abs(candidates[i][1])//div)//math.gcd(abs(candidates[i][1]//div), j_1)
+            tmp_2 = abs(candidates[i][3])//math.gcd(abs(candidates[i][3]), j_2)
             
             if tmp_1 > 1 and tmp_2 > 1: smooth[i] = [False, 1, 1, 1, 1]
 
@@ -95,27 +98,36 @@ def trial(pair, primes, const1, const2, div):
     for p in primes:
         while not result%p: result //= p
         if result == 1: break
+
     if result > 1:
-        if result > const1: return False, 1, 1, 1, 1
-        else: large1 = result
+        if result < const1: large1, large2 = 1, result
+        elif result < const2 and fermat_primality(result):
+            result = pollard_rho(result)
+            large1, large2 = min(result), max(result)
+        else: return False, 1, 1, 1, 1
+    else: large1, large2 = 1, 1
         
     result = abs(pair[1])//div
     for p in primes:
         while not result%p: result //= p
-        if result == 1: return True,1,1,1,large1
+        if result == 1: return True, 1, 1, large1, large2
+
     if result > 1:
-        if large1 > 1: return False,1,1,1,1
-        elif result < const1: large2 = result
-        else: return False,1,1,1,1
+        if large2 > 1: return False, 1, 1, 1, 1
+        elif result < const1: return True, 1, result, 1, 1
+        elif result < const2 and fermat_primality(result):
+            result = pollard_rho(result)
+            return True, min(result), max(result), 1, 1
+        else: return False, 1, 1, 1, 1
         
-    return True, 1, large2, 1, large1
+    return True, 1, 1, 1, 1
     
     
 # Pollard rho algorithm to factor small primes
 # This is used to find the two large primes when needed
 def pollard_rho(n):
-    a = int(random.randint(1,n-3))
-    s = int(random.randint(0,n-1))
+    a = int(random.randint(1, n-3))
+    s = int(random.randint(0, n-1))
     x = s
     y = s
     d = 1
@@ -123,12 +135,12 @@ def pollard_rho(n):
         e = 1
         X = x
         Y = y
-        for k in range(0,100):
+        for k in range(0, 100):
             x = (x*x+a)%n
             y = (y*y+a)%n
             y = (y*y+a)%n
             e = e*(x-y)%n
-        d = math.gcd(e,n)
+        d = math.gcd(e, n)
     if d == n:
         x = X
         y = Y
@@ -137,7 +149,7 @@ def pollard_rho(n):
             x = (x*x+a)%n
             y = (y*y+a)%n
             y = (y*y+a)%n
-            d = math.gcd(x-y,n)
+            d = math.gcd(x-y, n)
     if d == n:
         return pollard_rho(n)
     return d, n//d

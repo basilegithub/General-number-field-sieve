@@ -19,7 +19,7 @@ def convert_to_binary_lanczos(z, n):
         if (z >> n - i - 1)&1: res[i] = 1
     return res
     
-def create_solution(pairs,null_space,n,len_primes,primes,f_x,f_prime,m0,m1,inert,f_prime_sq,leading,f_prime_eval,u):
+def create_solution(pairs, null_space, n, len_primes, primes, f_x, m0, m1, inert, f_prime_sq, leading, f_prime_eval, u):
     f_norm = 0
     tmp = 1
     for x in f_x:
@@ -30,26 +30,27 @@ def create_solution(pairs,null_space,n,len_primes,primes,f_x,f_prime,m0,m1,inert
     S = 0
     
     x = f_prime_eval
-    x = x*create_rational(null_space,n,len_primes,primes,pairs)%n
+    x = x*create_rational(null_space, n, len_primes, primes, pairs)%n
     
     rational_square = [i for i in f_prime_sq]
     for k in range(len(null_space)):
         if null_space[k]:
-            rational_square = div_poly(poly_prod(rational_square,pairs[k][0]),f_x)
+            rational_square = div_poly(poly_prod(rational_square, pairs[k][0]), f_x)
             S += pairs[k][6]
             
-    x = x*pow(leading,S>>1,n)%n
+    x = x*pow(leading, S>>1, n)%n
             
-    coeff_bound = [fd*pow(f_norm,len(f_x)-1-i)*pow(2*(leading*u)*f_norm,S//2) for i in range(len(f_x)-1)]
+    coeff_bound = [fd*pow(f_norm, len(f_x)-1-i)*pow(2*(leading*u)*f_norm, S>>1) for i in range(len(f_x)-1)]
     
-    y = square_root(f_x,rational_square,inert,n,m0,m1,leading,max(coeff_bound))
-    y = y*pow(m1,S>>1,n)%n
+    y = square_root(f_x, rational_square, inert, m0, m1, leading, max(coeff_bound))
+    y = y*pow(m1, S>>1, n)%n
     
-    return x,y
+    return x, y
     
-def create_rational(null_space,n,len_primes,primes,pairs):
+def create_rational(null_space, n, len_primes, primes, pairs):
     x = 1
     vec = [0]*(len_primes)
+
     for z in range(len(null_space)):
         if null_space[z]:
             for large_prime in pairs[z][4]: x = x*large_prime%n
@@ -61,22 +62,26 @@ def create_rational(null_space,n,len_primes,primes,pairs):
                     tmp *= primes[p]
                     tmp2 += 1
                 vec[p] += tmp2
-    for i in range(len_primes): x = x*pow(primes[i],vec[i]//2,n)%n
+
+    for i in range(len_primes): x = x*pow(primes[i], vec[i]>>1, n)%n
+
     return x
     
-def create_solution_couveignes(pairs,null_space,n,len_primes,primes,f_x,f_prime,m0,m1,f_prime_sq,leading,f_prime_eval,d,inert_set,zero,delta,u,f_original):
+def create_solution_couveignes(pairs, null_space, n, len_primes, primes, f_x, f_prime, m0, m1, f_prime_sq, leading,
+                               f_prime_eval, d, inert_set, zero, delta, u):
     f_norm = 0
     for x in f_x:
         f_norm += x*x
     f_norm = int(math.sqrt(f_norm))+1
     S = 0
 
-    x = f_prime_eval*create_rational(null_space,n,len_primes,primes,pairs)%n
+    x = f_prime_eval*create_rational(null_space, n, len_primes, primes, pairs)%n
     norm_vec = [0]*(len(primes)+1)
     prod = [1]*d
+
     for k in range(len(null_space)):
         if null_space[k]:
-            for i in range(d): prod[i] *= my_norm(evaluate(pairs[k][0],zero[i]))
+            for i in range(d): prod[i] *= my_norm(evaluate(pairs[k][0], zero[i]))
             if pairs[k][1] < 0: norm_vec[0] += 1
             for p in range(len(primes)):
                 tmp = primes[p]
@@ -84,29 +89,32 @@ def create_solution_couveignes(pairs,null_space,n,len_primes,primes,f_x,f_prime,
                     tmp *= primes[p]
                     norm_vec[p+1] += 1
             S += pairs[k][6]
-    x = x*pow(leading,S>>1,n)%n
+
+    x = x*pow(leading, S>>1, n)%n
     coeffs = [0]*d
     for i in range(d):
-        for k in range(d): coeffs[i] += delta[k][i]*(isqrt(prod[k])+1)
+        for k in range(d): coeffs[i] += delta[k][i]*(isqrt(prod[k]) + 1)
         
     #goal = 2*max([abs(c) for c in coeffs])
         
     fd = int(pow(d,1.5))+1
-    coeff_bound = [fd*pow(f_norm,d-i)*pow(2*u*f_norm,S>>1) for i in range(len(f_x)-1)]
+    coeff_bound = [fd*pow(f_norm, d-i)*pow(2*u*f_norm, S>>1) for i in range(len(f_x)-1)]
     
     goal = max(coeff_bound)
 
     sqrt_set, bounds_set = [], []
-    flag = pow(2,(int(math.sqrt(math.log2(goal)))))
+
+    target = pow(2, (int(math.sqrt(math.log2(goal)))))
     P = 1
     p = 0
     while P < goal and p < len(inert_set):
         P *= inert_set[p]
         bounds_set.append(inert_set[p])
         p += 1
+
     while P < goal:
-        tmp = random.randint(flag//1000,flag*1000)
-        if m1%tmp and is_prime(tmp) and irreducibility(f_x,tmp) and tmp not in inert_set:
+        tmp = random.randint(target//1000,target*1000)
+        if m1%tmp and is_prime(tmp) and irreducibility(f_x, tmp) and tmp not in inert_set:
             inert_set.append(tmp)
             P *= tmp
             bounds_set.append(tmp)
@@ -115,10 +123,10 @@ def create_solution_couveignes(pairs,null_space,n,len_primes,primes,f_x,f_prime,
     for p in bounds_set:
         rational_square = [i%p for i in f_prime_sq]
         large = 1
-        norm_sq = power(rational_square,f_x,p,(pow(p,d)-1)//(p-1))[0]%p
+        norm_sq = power(rational_square, f_x, p, (pow(p, d)-1)//(p-1))[0]%p
         for k in range(len(null_space)):
             if null_space[k]:
-                rational_square = div_poly_mod(poly_prod_mod(rational_square,pairs[k][0],p),f_x,p)
+                rational_square = div_poly_mod(poly_prod_mod(rational_square, pairs[k][0], p), f_x, p)
                 for large_prime in pairs[k][2]: large = large*large_prime[0]%p
                 norm_sq = norm_sq*pairs[k][1]%p
                 
@@ -128,17 +136,17 @@ def create_solution_couveignes(pairs,null_space,n,len_primes,primes,f_x,f_prime,
                 
         while len(rational_square) < d: rational_square = [0]+rational_square
         
-        root = compute_root_mod(rational_square,f_x,p)
+        root = compute_root_mod(rational_square, f_x, p)
         
-        N = power(f_prime,f_x,p,(pow(p,d)-1)//(p-1))[0]
+        N = power(f_prime, f_x, p, (pow(p, d)-1)//(p-1))[0]
         
         if (norm_vec[0]>>1)&1: N = -N%p
         for i in range(len(primes)):
-            N = N*pow(primes[i],norm_vec[i+1]>>1,p)%p
+            N = N*pow(primes[i], norm_vec[i+1]>>1, p)%p
         
-        N = N*large*pow(leading,(d-1)*(S>>1),p)%p
+        N = N*large*pow(leading, (d-1)*(S>>1), p)%p
         
-        if power(root,f_x,p,(pow(p,d)-1)//(p-1))[0] != N: root = [-i%p for i in root]
+        if power(root, f_x, p, (pow(p, d)-1)//(p-1))[0] != N: root = [-i%p for i in root]
 
         sqrt_set.append(root)
         iteration += 1
@@ -149,27 +157,28 @@ def create_solution_couveignes(pairs,null_space,n,len_primes,primes,f_x,f_prime,
     y = 0
     for i in range(len(sqrt_set)):
         while len(sqrt_set[i]) < d: sqrt_set[i] = [0]+sqrt_set[i]
-        sqrt_set[i] = eval_F(leading*m0,m1,sqrt_set[i],d-1)%bounds_set[i]
-        tmp = invmod(P//bounds_set[i],bounds_set[i])
+        sqrt_set[i] = eval_F(leading*m0, m1, sqrt_set[i], d-1)%bounds_set[i]
+        tmp = invmod(P//bounds_set[i], bounds_set[i])
         tmp2 = tmp*sqrt_set[i]
         r += tmp2//bounds_set[i]
         rest += (tmp2%bounds_set[i])/bounds_set[i]
         y = (y+tmp2*(P//bounds_set[i])%n)%n
         
     r = r+round(rest)
-    y = pow(m1,S>>1,n)*(y-r*P%n)%n
+    y = pow(m1, S>>1, n)*(y-r*P%n)%n
     return x,y
 
-def compute_factors(pairs_used, vec, n, primes, f_x, g, g_prime, g_prime_sq, g_prime_eval, m0, m1, leading_coeff, d, inert_set, zeros, delta, M, flag_square_root_couveignes, time_1, LOG_PATH):
+def compute_factors(pairs_used, vec, n, primes, g, g_prime, g_prime_sq, g_prime_eval, m0, m1, leading_coeff, d,
+                    inert_set, zeros, delta, M, flag_square_root_couveignes, time_1, LOG_PATH):
     if flag_square_root_couveignes:
-        x,y = create_solution_couveignes(pairs_used,vec,n,len(primes),primes,g,g_prime,m0,m1,g_prime_sq,leading_coeff,g_prime_eval,d,inert_set,zeros,delta,2*M,f_x)
+        x,y = create_solution_couveignes(pairs_used, vec, n, len(primes), primes, g, g_prime, m0, m1, g_prime_sq,
+                                         leading_coeff, g_prime_eval, d, inert_set, zeros, delta, M<<1)
     
     else:
-        x,y = create_solution(pairs_used,vec,n,len(primes),primes,g,g_prime,m0,m1,inert_set[-1],g_prime_sq,leading_coeff,g_prime_eval,2*M)
-    
-    # print(math.gcd(x-y,n), math.gcd(x+y,n))
+        x,y = create_solution(pairs_used, vec, n, len(primes), primes, g, m0, m1, inert_set[-1], g_prime_sq,
+                              leading_coeff, g_prime_eval, M<<1)
 
-    if x != y and math.gcd(x-y,n) != 1 and math.gcd(x+y,n) != 1:
+    if x != y and math.gcd(x-y, n) != 1 and math.gcd(x+y, n) != 1:
         print_final_message(x, y, n, time_1, LOG_PATH)
         return True, 1
 

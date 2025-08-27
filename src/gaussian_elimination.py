@@ -39,6 +39,7 @@ def siqs_solve_matrix_opt(M_opt, n, m):
             for k in range(m):
                 if k != j and (M_opt[k] >> i) & 1:  # test M[i][k] == 1
                     add_column_opt(M_opt, k, j)
+                    
     perf_squares = []
     for i in range(n):
         if not row_is_marked[i]:

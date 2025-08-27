@@ -31,7 +31,7 @@ def DFS_fp(graph, init):
     tmp = graph[init[1]]
 
     if init[0] in tmp:
-        return path+[init[0]]
+        return path + [init[0]]
     
     neighbors += tmp
     
@@ -50,7 +50,7 @@ def DFS_fp(graph, init):
         neighbors = [next_node]
 
         if init[0] in graph[next_node]:
-            return path+[init[0]]
+            return path + [init[0]]
         
         parent = stack[-1][0]
 
@@ -68,14 +68,14 @@ def DFS_fp(graph, init):
 def combine_fp(pair, pairs_used, fp, path, divide_leading, g):
     tmp = [i for i in pair]
     for i in range(len(path)-1):
-        firstp,secondp = min(path[i],path[i+1]),max(path[i],path[i+1])
+        firstp, secondp = min(path[i],path[i+1]), max(path[i],path[i+1])
 
         combine = fp[firstp][secondp]
-        tmp2 = [div_poly(poly_prod(tmp[0],combine[0]),g),
+        tmp2 = [div_poly(poly_prod(tmp[0], combine[0]), g),
                 tmp[1]*combine[1],
-                [[1,1]],
+                [[1, 1]],
                 tmp[3]*combine[3],
-                tmp[4]+[path[i]],
+                tmp[4] + [path[i]],
                 poly_prod(tmp[5],combine[5]),
                 tmp[6]+1]
         for p in range(len(divide_leading)):
@@ -188,7 +188,7 @@ def handle_large_fp(pair, large_primes, pairs_used, fp, graph_fp, size_fp, paren
                     path_cycle = find_cycle_fp(graph_fp, [small_p, big_p])
                     if len(path_cycle) < 11: cycle_len[len(path_cycle)-2] += 1
                     else: cycle_len[-1] += 1
-                    combine_fp(pair,pairs_used,fp,path_cycle,divide_leading,g)
+                    combine_fp(pair, pairs_used, fp, path_cycle, divide_leading, g)
                     partial_found_fp += 1
 
     return pairs_used, fp, graph_fp, size_fp, parent_fp, cycle_len, full_found, partial_found_fp
@@ -220,7 +220,7 @@ def DFS_pf(graph, init):
     tmp = graph[init[1]]
 
     if init[0][0] in tmp and init[0] in tmp[init[0][0]]:
-        return path+[init[0]]
+        return path + [init[0]]
 
     # Initialize the potential paths
     for key in tmp.keys():
@@ -242,7 +242,7 @@ def DFS_pf(graph, init):
         tmp = graph[next_node]
 
         if init[0][0] in tmp and init[0] in tmp[init[0][0]]:
-            return path+[init[0]]
+            return path + [init[0]]
         
         parent = stack[-1][0]
 
@@ -270,12 +270,12 @@ def combine_pf(pair, pairs_used, pf, path, divide_leading, g):
         else: firstp, secondp = path[i+1], path[i]
 
         combine = pf[firstp][secondp]
-        tmp2 = [div_poly(poly_prod(tmp[0],combine[0]),g),
+        tmp2 = [div_poly(poly_prod(tmp[0], combine[0]), g),
                 tmp[1]*combine[1],
-                tmp[2]+[path[i]],
+                tmp[2] + [path[i]],
                 tmp[3]*combine[3],
                 [1],
-                poly_prod(tmp[5],combine[5]),
+                poly_prod(tmp[5], combine[5]),
                 tmp[6]+1]
         for p in range(len(divide_leading)):
             tmp2.append(tmp[7+p] or combine[7+p])
@@ -290,10 +290,10 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, paren
         pair[2] = [tmp]
 
     else:
-        tmp = (large_primes[1],pair[5][1]*invmod(-pair[5][0],large_primes[1])%large_primes[1]) # [smallest_prime, r_smallest]
+        tmp = (large_primes[1], pair[5][1]*invmod(-pair[5][0], large_primes[1])%large_primes[1]) # [smallest_prime, r_smallest]
         pair[2] = [tmp]
 
-    tmp2 = (large_primes[2],pair[5][1]*invmod(-pair[5][0],large_primes[2])%large_primes[2]) # [largest_prime, r_largest]
+    tmp2 = (large_primes[2], pair[5][1]*invmod(-pair[5][0], large_primes[2])%large_primes[2]) # [largest_prime, r_largest]
 
     if large_primes[1] == large_primes[2]:
         pairs_used.append(pair)
@@ -402,7 +402,7 @@ def handle_large_pf(pair, large_primes, pairs_used, pf, graph_pf, size_pf, paren
                     path_cycle = find_cycle_pf(graph_pf, [tmp, tmp2])
                     if len(path_cycle) < 11: cycle_len[len(path_cycle)-2] += 1
                     else: cycle_len[-1] += 1
-                    combine_pf(pair,pairs_used,pf,path_cycle,divide_leading,g)
+                    combine_pf(pair, pairs_used, pf, path_cycle, divide_leading, g)
                     partial_found_pf += 1
 
     return pairs_used, pf, graph_pf, size_pf, parent_pf, cycle_len, full_found, partial_found_pf

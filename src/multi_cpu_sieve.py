@@ -1,7 +1,6 @@
 # This file contains the functions that realize the sieve step when multiprocessing is on (NB_CPU > 1)
 
 from datetime import datetime
-import time
 import sys, os
 import math
 import log
@@ -11,8 +10,8 @@ from relations import *
 from utils import format_duration
 import multiprocessing
                 
-def siever(b_queue, tmp_pairs, f_x, primes, R_p, prod_primes, m0, m1, d, b, M, logs, offset, leading_coeff, divide_leading,
-           pow_div, const_1, const_2, flag_use_batch_smooth_test):
+def siever(b_queue, tmp_pairs, f_x, primes, R_p, prod_primes, m0, m1, b, M, logs, offset, leading_coeff, divide_leading,
+           pow_div, const_1, const_2, FLAG_USE_BATCH_SMOOTH_TEST):
     
     while True:
         try:
@@ -27,15 +26,15 @@ def siever(b_queue, tmp_pairs, f_x, primes, R_p, prod_primes, m0, m1, d, b, M, l
                         div *= p
                         tmp *= p
 
-            pairs = sieve.sieve(M,f_x,primes,R_p,m0,m1,d,b,logs,offset,leading_coeff,div)
+            pairs = sieve.sieve(M,f_x,primes,R_p,m0,m1,b,logs,offset,leading_coeff,div)
 
-            if flag_use_batch_smooth_test:
+            if FLAG_USE_BATCH_SMOOTH_TEST:
                 smooth = find_smooth.batch_smooth_test(pairs, prod_primes, const_1, const_2, div)
 
             else:
                 smooth = [0]*len(pairs)
                 for i, pair in enumerate(pairs):
-                    smooth[i] = find_smooth.trial(pair,primes,const_1,const_2,div)
+                    smooth[i] = find_smooth.trial(pair, primes, const_1, const_2, div)
 
             tmp_pairs.put((pairs, smooth))
 
@@ -43,7 +42,7 @@ def siever(b_queue, tmp_pairs, f_x, primes, R_p, prod_primes, m0, m1, d, b, M, l
             pass
 
 def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leading, prod_primes, pow_div, pairs_used,
-                   const1, const2, logs, m0, m1, M, d, n, flag_use_batch_smooth_test, LOG_PATH, NB_CPU):
+                   const1, const2, logs, m0, m1, M, FLAG_USE_BATCH_SMOOTH_TEST, LOG_PATH, NB_CPU):
     fp, pf = {}, {}
     parent_fp, parent_pf = {}, {}
     full_found = 0
@@ -53,7 +52,7 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
     offset = 15+math.log2(const1)
     cycle_len = [0]*10
     
-    V = 3+len(primes)+B_prime+len(Q)+len(divide_leading)
+    V = 3 + len(primes) + B_prime + len(Q) + len(divide_leading)
     
     log.write_log(LOG_PATH, "sieving...")
     log.write_log(LOG_PATH, "need to find at least "+str(V+10)+" relations\n")
@@ -72,8 +71,8 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
 
     for i in range(cpu-1):
         pro = multiprocessing.Process(target=siever,args=(b_queue, tmp_pairs_queues[i], f_x, primes, R_p, prod_primes, m0, m1,
-                                                          d, b, M, logs, offset, leading_coeff, divide_leading, 
-                                                          pow_div, const1, const2, flag_use_batch_smooth_test))
+                                                          b, M, logs, offset, leading_coeff, divide_leading, 
+                                                          pow_div, const1, const2, FLAG_USE_BATCH_SMOOTH_TEST))
         sievers.append(pro)
         pro.start()
         
@@ -98,10 +97,12 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
                             full_found += 1
 
                         elif z[4] > 1 and z[2] == 1:
-                            pairs_used, fp, graph_fp, size_fp, parent_fp, cycle_len, full_found, partial_found_fp = handle_large_fp(tmp,z,pairs_used,fp,graph_fp,size_fp,parent_fp,g,divide_leading,cycle_len,full_found,partial_found_fp)
+                            pairs_used, fp, graph_fp, size_fp, parent_fp, cycle_len, full_found, partial_found_fp = handle_large_fp(tmp, z, pairs_used, fp, graph_fp, size_fp, parent_fp, g, divide_leading,
+                                                                                                                                    cycle_len, full_found, partial_found_fp)
 
                         elif z[4] == 1 and z[2] > 1:
-                            pairs_used, pf, graph_pf, size_pf, parent_pf, cycle_len, full_found, partial_found_pf = handle_large_pf(tmp, z, pairs_used, pf, graph_pf, size_pf, parent_pf, g, divide_leading, cycle_len, full_found, partial_found_pf)
+                            pairs_used, pf, graph_pf, size_pf, parent_pf, cycle_len, full_found, partial_found_pf = handle_large_pf(tmp, z, pairs_used, pf, graph_pf, size_pf, parent_pf, g, divide_leading,
+                                                                                                                                    cycle_len, full_found, partial_found_pf)
 
                 sys.stdout.write('\r'+"b = "+str(b)+" "+str(len(pairs_used))+"/("+str(V)+"+10) ; full relations = "+str(full_found)+" | partial found fp = "+str(partial_found_fp)+" ("+str(size_fp)+") | partial found pf = "+str(partial_found_pf)+" ("+str(size_pf)+")")
 

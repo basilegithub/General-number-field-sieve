@@ -11,7 +11,7 @@ from relations import *
 from utils import format_duration
 
 def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leading, prod_primes, pow_div, pairs_used,
-                   const1, const2, logs, m0, m1, M, d, n, flag_use_batch_smooth_test, LOG_PATH):
+                   const1, const2, logs, m0, m1, M, FLAG_USE_BATCH_SMOOTH_TEST, LOG_PATH):
     fp, pf = {}, {}
     parent_fp, parent_pf = {}, {}
     full_found = 0
@@ -21,7 +21,7 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
     offset = 15+math.log2(const1)
     cycle_len = [0]*10
     
-    V = 3+len(primes)+B_prime+len(Q)+len(divide_leading)
+    V = 3 + len(primes) + B_prime + len(Q) + len(divide_leading)
     
     log.write_log(LOG_PATH, "sieving...")
     log.write_log(LOG_PATH, "need to find at least "+str(V+10)+" relations\n")
@@ -42,16 +42,16 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
                     div *= p
                     tmp *= p
         
-        pairs = sieve.sieve(M,f_x,primes,R_p,m0,m1,d,b,logs,offset,leading_coeff,div)
+        pairs = sieve.sieve(M, f_x, primes, R_p, m0, m1, b, logs, offset, leading_coeff, div)
 
-        if flag_use_batch_smooth_test:
+        if FLAG_USE_BATCH_SMOOTH_TEST:
             smooth = find_smooth.batch_smooth_test(pairs, prod_primes, const1, const2, div)
 
         for i, pair in enumerate(pairs):
-            if flag_use_batch_smooth_test:
+            if FLAG_USE_BATCH_SMOOTH_TEST:
                 z = smooth[i]
             else:
-                z = find_smooth.trial(pair,primes,const1,const2,div)
+                z = find_smooth.trial(pair, primes, const1, const2, div)
             if z[0]:
                 tmp = [u for u in pair]
                 for p in divide_leading: tmp.append(not pair[5][0]%p)
@@ -60,10 +60,12 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
                     full_found += 1
 
                 elif z[4] > 1 and z[2] == 1:
-                    pairs_used, fp, graph_fp, size_fp, parent_fp, cycle_len, full_found, partial_found_fp = handle_large_fp(tmp,z,pairs_used,fp,graph_fp,size_fp,parent_fp,g,divide_leading,cycle_len,full_found,partial_found_fp)
+                    pairs_used, fp, graph_fp, size_fp, parent_fp, cycle_len, full_found, partial_found_fp = handle_large_fp(tmp, z, pairs_used, fp, graph_fp, size_fp, parent_fp, g, divide_leading,
+                                                                                                                            cycle_len, full_found, partial_found_fp)
 
                 elif z[4] == 1 and z[2] > 1:
-                    pairs_used, pf, graph_pf, size_pf, parent_pf, cycle_len, full_found, partial_found_pf = handle_large_pf(tmp, z, pairs_used, pf, graph_pf, size_pf, parent_pf, g, divide_leading, cycle_len, full_found, partial_found_pf)
+                    pairs_used, pf, graph_pf, size_pf, parent_pf, cycle_len, full_found, partial_found_pf = handle_large_pf(tmp, z, pairs_used, pf, graph_pf, size_pf, parent_pf, g, divide_leading,
+                                                                                                                            cycle_len, full_found, partial_found_pf)
 
         sys.stdout.write('\r'+"b = "+str(b)+" "+str(len(pairs_used))+"/("+str(V)+"+10) ; full relations = "+str(full_found)+" | partial found fp = "+str(partial_found_fp)+" ("+str(size_fp)+") | partial found pf = "+str(partial_found_pf)+" ("+str(size_pf)+")")
         b += 1
@@ -80,6 +82,5 @@ def find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leadin
     log.write_log(LOG_PATH, "11+-cycle: "+str(cycle_len[-1])+"\n")
     log.write_log(LOG_PATH, str(partial_found_fp)+" partial relations fp found")
     log.write_log(LOG_PATH, str(partial_found_pf)+" partial relations pf found")
-    #log.write_log(LOG_PATH, str(len(fp))+" smooth with large prime(s) found")
                 
     return pairs_used, V
