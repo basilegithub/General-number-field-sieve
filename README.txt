@@ -115,6 +115,6 @@ Here are some points I consider working on at some point:
 
 Here are the next steps:
 
-- Some optimizations may be possible here and there, but I have already a big amount of work to
+- Some optimizations may be possible here and there, but I have already done a big amount of work to
 	get fast code. The next step on this topic is switching to C. Python is intrisically
 	limited on the topic of speed, as it is compiled on the fly.
