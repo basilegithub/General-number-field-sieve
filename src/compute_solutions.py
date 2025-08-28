@@ -3,7 +3,7 @@
 import math, sys
 from square_roots import *
 from polynomial_functions import *
-from utils import *
+from utils import my_norm
 from datetime import datetime
 import log
 
@@ -19,7 +19,7 @@ def convert_to_binary_lanczos(z, n):
         if (z >> n - i - 1)&1: res[i] = 1
     return res
     
-def create_solution(pairs, null_space, n, len_primes, primes, f_x, m0, m1, inert, f_prime_sq, leading, f_prime_eval, u):
+def create_solution(pairs, null_space, n, len_primes, primes, f_x, m0, m1, inert, f_prime_sq, leading, f_prime_eval, u, LOG_PATH):
     f_norm = 0
     tmp = 1
     for x in f_x:
@@ -42,7 +42,7 @@ def create_solution(pairs, null_space, n, len_primes, primes, f_x, m0, m1, inert
             
     coeff_bound = [fd*pow(f_norm, len(f_x)-1-i)*pow(2*(leading*u)*f_norm, S>>1) for i in range(len(f_x)-1)]
     
-    y = square_root(f_x, rational_square, inert, m0, m1, leading, max(coeff_bound))
+    y = square_root(f_x, rational_square, inert, m0, m1, leading, max(coeff_bound), LOG_PATH)
     y = y*pow(m1, S>>1, n)%n
     
     return x, y
@@ -166,17 +166,17 @@ def create_solution_couveignes(pairs, null_space, n, len_primes, primes, f_x, f_
         
     r = r+round(rest)
     y = pow(m1, S>>1, n)*(y-r*P%n)%n
-    return x,y
+    return x, y
 
 def compute_factors(pairs_used, vec, n, primes, g, g_prime, g_prime_sq, g_prime_eval, m0, m1, leading_coeff, d,
-                    inert_set, zeros, delta, M, flag_square_root_couveignes, time_1, LOG_PATH):
-    if flag_square_root_couveignes:
+                    inert_set, zeros, delta, M, FLAG_SQUARE_ROOT_COUVEIGNES, time_1, LOG_PATH):
+    if FLAG_SQUARE_ROOT_COUVEIGNES:
         x,y = create_solution_couveignes(pairs_used, vec, n, len(primes), primes, g, g_prime, m0, m1, g_prime_sq,
                                          leading_coeff, g_prime_eval, d, inert_set, zeros, delta, M<<1)
     
     else:
         x,y = create_solution(pairs_used, vec, n, len(primes), primes, g, m0, m1, inert_set[-1], g_prime_sq,
-                              leading_coeff, g_prime_eval, M<<1)
+                              leading_coeff, g_prime_eval, M<<1, LOG_PATH)
 
     if x != y and math.gcd(x-y, n) != 1 and math.gcd(x+y, n) != 1:
         print_final_message(x, y, n, time_1, LOG_PATH)

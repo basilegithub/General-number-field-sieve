@@ -61,8 +61,8 @@ def block(T, N):
     
 # The whole block lanczos algorithm
 # See the README for sources
-def block_lanczos(B, nb_relations, N, LOG_PATH):
-    Y = [random.randint(0, (1<<N)-1) for _ in range(nb_relations)]
+def block_lanczos(B, nb_relations, BLOCK_SIZE, LOG_PATH):
+    Y = [random.randint(0, (1<<BLOCK_SIZE)-1) for _ in range(nb_relations)]
 
     X = [0]*nb_relations
     b = transpose_sparse(B, nb_relations)
@@ -72,14 +72,14 @@ def block_lanczos(B, nb_relations, N, LOG_PATH):
     P = [0 for _ in range(nb_relations)]
     V = Vo
     d = 1
-    while d and i <= int(len(B)/(N-0.764))+10:
+    while d and i <= int(len(B)/(BLOCK_SIZE-0.764))+10:
         Z = sparse_multiply(b, sparse_multiply(B, V))
-        vAv = dense_multiply(transpose_dense(V, N), Z)
-        vAAv = dense_multiply(transpose_dense(Z, N), Z)
+        vAv = dense_multiply(transpose_dense(V, BLOCK_SIZE), Z)
+        vAAv = dense_multiply(transpose_dense(Z, BLOCK_SIZE), Z)
         
-        W_inv, d = block(vAv,N)
+        W_inv, d = block(vAv, BLOCK_SIZE)
         
-        X = add_vector(X, dense_multiply(V, dense_multiply(W_inv, dense_multiply(transpose_dense(V, N), Vo))))
+        X = add_vector(X, dense_multiply(V, dense_multiply(W_inv, dense_multiply(transpose_dense(V, BLOCK_SIZE), Vo))))
         
         neg_d = switch_indices(d)
         
@@ -99,9 +99,9 @@ def block_lanczos(B, nb_relations, N, LOG_PATH):
  
     log.write_log(LOG_PATH, "lanczos halted after "+str(i)+" iterations")
     x = add_vector(X, Y)
-    Z = concatenate(x, V, N)
-    matrix = transpose_dense(sparse_multiply(B, Z), N<<1)
-    Z = transpose_dense(Z, N<<1)
+    Z = concatenate(x, V, BLOCK_SIZE)
+    matrix = transpose_dense(sparse_multiply(B, Z), BLOCK_SIZE<<1)
+    Z = transpose_dense(Z, BLOCK_SIZE<<1)
     matrix, Z = solve(matrix, Z, len(B))
 
     solutions = []
@@ -110,7 +110,7 @@ def block_lanczos(B, nb_relations, N, LOG_PATH):
             solutions.append(Z[i])
 
     if len(solutions) == 0:
-        solutions = block_lanczos(B,nb_relations,N<<1,LOG_PATH)
+        solutions = block_lanczos(B,nb_relations,BLOCK_SIZE<<1,LOG_PATH)
 
     return solutions
     

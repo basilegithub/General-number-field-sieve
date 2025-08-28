@@ -1,6 +1,6 @@
 # This file contains the functions that perform gaussian elimination on a dense matrix
 
-from utils import *
+from utils import lowest_set_bit
 
 def add_column_opt(M_opt, tgt, src):
     """For a matrix produced by siqs_build_matrix_opt, add the column
@@ -48,4 +48,5 @@ def siqs_solve_matrix_opt(M_opt, n, m):
                 if (M_opt[j] >> i) & 1:  # test M[i][j] == 1
                     perfect_sq_indices.append(pivots[j])
             perf_squares.append(perfect_sq_indices)
+            
     return perf_squares

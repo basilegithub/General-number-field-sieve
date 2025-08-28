@@ -338,28 +338,28 @@ def prime_combinations_with_indices(Q, l, B):
 
     yield from backtrack(0, 0, 1)
 
-def compute_e(m0, root_used, nb_roots, prod, a_d, n, d):
+def compute_e(m0, root_used, NB_ROOTS, prod, a_d, n, d):
     e = []
-    tmp_m = m_mu(m0, root_used, [0]*nb_roots, nb_roots)
+    tmp_m = m_mu(m0, root_used, [0]*NB_ROOTS, NB_ROOTS)
     base = poly(tmp_m, prod, a_d, n, d)[1]%prod
-    for i in range(nb_roots):
+    for i in range(NB_ROOTS):
         line = [0]*d
         for j in range(d):
             if not i:
-                tmp_m = m_mu(m0, root_used, [j]+[0]*(nb_roots-1), nb_roots)
+                tmp_m = m_mu(m0, root_used, [j]+[0]*(NB_ROOTS-1), NB_ROOTS)
                 line[j] = poly(tmp_m, prod, a_d, n, d)[1]%prod
             elif j:
-                tmp_m = m_mu(m0, root_used, [0]*i+[j]+[0]*(nb_roots-i-1), nb_roots)
+                tmp_m = m_mu(m0, root_used, [0]*i+[j]+[0]*(NB_ROOTS-i-1), NB_ROOTS)
                 line[j] = (poly(tmp_m, prod, a_d, n, d)[1]-base)%prod
         e.append(line)
 
     return e
 
-def compute_f(n, a_d, m0, d, prod, root_used, nb_roots, e):
+def compute_f(n, a_d, m0, d, prod, root_used, NB_ROOTS, e):
     f0 = (n-a_d*pow(m0, d))/(prod*prod*pow(m0, d-1))
     f = []
 
-    for i in range(nb_roots):
+    for i in range(NB_ROOTS):
         line = [0]*d
         for j in range(d):
             line[j] = -(a_d*d*root_used[i][j]/pow(prod, 2)+e[i][j]/prod)
@@ -367,12 +367,12 @@ def compute_f(n, a_d, m0, d, prod, root_used, nb_roots, e):
 
     return f, f0
 
-def create_first_array(nb_roots, f0, f, d):
-    vec = [0]*(nb_roots>>1)
+def create_first_array(NB_ROOTS, f0, f, d):
+    vec = [0]*(NB_ROOTS>>1)
     array1 = []
 
     while vec[-1] < d:
-        U = (f0 + sum([f[j][vec[j]] for j in range(nb_roots>>1)]))%1
+        U = (f0 + sum([f[j][vec[j]] for j in range(NB_ROOTS>>1)]))%1
 
         if not len(array1) or U > array1[-1][0]: array1.append([U, [i for i in vec]])
         else:
@@ -393,8 +393,8 @@ def create_first_array(nb_roots, f0, f, d):
 
     return array1
 
-def create_second_array(nb_roots, len_vec, d, f):
-    vect = [0]*(nb_roots-len_vec)
+def create_second_array(NB_ROOTS, len_vec, d, f):
+    vect = [0]*(NB_ROOTS-len_vec)
     array2 = []
     while vect[-1] < d:
         U = -sum([f[len_vec+j][vect[j]] for j in range(len(vect))])%1

@@ -2,13 +2,14 @@
 
 from polynomial_functions import *
 import time
+import log
     
-def square_root(f, N, p, m0, m1, leading, bound):
+def square_root(f, N, p, m0, m1, leading, bound, LOG_PATH):
     d = len(f)-1
     root = compute_root_mod_Newton(N, f, p)
-    print("initial root computed, lifting...")
+    log.write_log(LOG_PATH, "Initial root computed, lifting...")
     root = Newton(root, N, f, p, bound)
-    print(str(time.localtime()[3])+":"+str(time.localtime()[4])+":"+str(time.localtime()[5])+" lift done")
+    log.write_log(LOG_PATH, "Lift done")
     return eval_F(leading*m0, m1, root, d-1)
                 
 def Newton(root, gamma, f, p, bound):

@@ -64,15 +64,15 @@ def degree_one_poly_selection(n, primes):
     return best_poly
 
 # Kleinjung first polynomial search algorithm
-def Kleinjung_poly_search(n, primes, nb_roots, prime_bound, c, M, d, NB_POLY_COARSE_EVAL, NB_POLY_PRECISE_EVAL, NB_CPU_POLY_SELECTION, LOG_PATH):
+def Kleinjung_poly_search(n, primes, NB_ROOTS, PRIME_BOUND, MULTIPLIER, M, d, NB_POLY_COARSE_EVAL, NB_POLY_PRECISE_EVAL, NB_CPU_POLY_SELECTION, LOG_PATH):
     t1 = datetime.now()
 
     P = []
     polys = []
     for p in primes:
-        if p > prime_bound: break
+        if p > PRIME_BOUND: break
         if p%d == 1: P.append(p)
-    a_d = c
+    a_d = MULTIPLIER
     if d >= 4: admax = round(pow(pow(M, 2*d-2)/n, 1/(d-3)))
     else: admax = M
 
@@ -83,10 +83,10 @@ def Kleinjung_poly_search(n, primes, nb_roots, prime_bound, c, M, d, NB_POLY_COA
 
     for _ in range(2*(cpu-1)):
         ad_queue.put(a_d)
-        a_d += c
+        a_d += MULTIPLIER
 
     for i in range(cpu-1):
-        pro = multiprocessing.Process(target=worker, args=(ad_queue, poly_queue[i], primes, n, M, d, nb_roots, P))
+        pro = multiprocessing.Process(target=worker, args=(ad_queue, poly_queue[i], primes, n, M, d, NB_ROOTS, P))
         sievers.append(pro)
         pro.start()
 
@@ -97,7 +97,7 @@ def Kleinjung_poly_search(n, primes, nb_roots, prime_bound, c, M, d, NB_POLY_COA
         if ad_queue.qsize() < (cpu-1):
             for _ in range(2*(cpu-1)):
                 ad_queue.put(a_d)
-                a_d += c
+                a_d += MULTIPLIER
 
         for i in range(cpu-1):
 
@@ -178,7 +178,7 @@ def practical_d(n):
 
 ## Workers definition
 
-def worker(ad_queue, output_queue, primes, n, M, d, nb_roots, P):
+def worker(ad_queue, output_queue, primes, n, M, d, NB_ROOTS, P):
     while True:
         
         try:
@@ -207,31 +207,31 @@ def worker(ad_queue, output_queue, primes, n, M, d, nb_roots, P):
                         Q.append(p)
                         roots.append(root)
 
-                if len(roots) >= nb_roots:
+                if len(roots) >= NB_ROOTS:
 
-                    combinations = prime_combinations_with_indices(Q, nb_roots, ad1max)
+                    combinations = prime_combinations_with_indices(Q, NB_ROOTS, ad1max)
 
                     for set in combinations:
                         Q_used = []
                         prod = 1
-                        for i in range(nb_roots):
+                        for i in range(NB_ROOTS):
                             Q_used.append(Q[set[i]])
                             prod *= Q[set[i]]
 
-                        root_used = [roots[set[i]] for i in range(nb_roots)]
-                        for i in range(nb_roots): # Do some CRT
+                        root_used = [roots[set[i]] for i in range(NB_ROOTS)]
+                        for i in range(NB_ROOTS): # Do some CRT
                             x = prod//Q_used[i]
                             tmp2 = x*invmod(x, Q_used[i])
                             for j in range(d): root_used[i][j] = root_used[i][j]*tmp2%prod
 
                         m0 = mw+(-mw)%prod
-                        e = compute_e(m0, root_used, nb_roots, prod, a_d, n, d)
-                        f, f0 = compute_f(n, a_d, m0, d, prod, root_used, nb_roots, e)
+                        e = compute_e(m0, root_used, NB_ROOTS, prod, a_d, n, d)
+                        f, f0 = compute_f(n, a_d, m0, d, prod, root_used, NB_ROOTS, e)
 
                         epsilon = ad2max/m0
-                        array1 = create_first_array(nb_roots, f0, f, d)
-                        len_vec = nb_roots>>1
-                        array2 = create_second_array(nb_roots, len_vec, d, f)
+                        array1 = create_first_array(NB_ROOTS, f0, f, d)
+                        len_vec = NB_ROOTS>>1
+                        array2 = create_second_array(NB_ROOTS, len_vec, d, f)
 
                         to_return_array = []
                         
@@ -241,8 +241,8 @@ def worker(ad_queue, output_queue, primes, n, M, d, nb_roots, P):
                             if min == len(array1): break
                             z = min
                             while z < len(array1) and abs(array2[j][0]-array1[z][0]) < epsilon:
-                                tmp = [poly(m_mu(m0, root_used, array1[z][1]+array2[j][1], nb_roots), prod, a_d, n, d),
-                                       m_mu(m0, root_used, array1[z][1]+array2[j][1], nb_roots),
+                                tmp = [poly(m_mu(m0, root_used, array1[z][1]+array2[j][1], NB_ROOTS), prod, a_d, n, d),
+                                       m_mu(m0, root_used, array1[z][1]+array2[j][1], NB_ROOTS),
                                        prod]
                                 tmp[0], tmp[1] = local_opt(tmp[0], [prod,-tmp[1]],primes[-1])
                                 _, s = get_sieve_region(tmp[0], primes[-1])

@@ -60,27 +60,27 @@ A suitable command looks like "python main.py --n [your_number]"
 
 I have defined a few parameters directly you can edit in the config file.
 
-- batch_smooth_test: If True, the batch smoothness test from Bernstein will be used. Otherwise, the naive (trial division from the prime factor base) approach will be used. Batch smoothness test is generally faster
+- FLAG_USE_BATCH_SMOOTH_TEST: If True, the batch smoothness test from Bernstein will be used. Otherwise, the naive (trial division from the prime factor base) approach will be used. Batch smoothness test is generally faster
 
-- gaussian_pivot: If True, gaussian elimination will ALWAYS be used in the linear algebra step. If you want to use block Lanczos of Wiedemann algorithms, this has to be set to False.
+- FLAG_GAUSSIAN_PIVOT: If True, gaussian elimination will ALWAYS be used in the linear algebra step. If you want to use block Lanczos of Wiedemann algorithms, this has to be set to False.
 
-- lanczos: If True, the block Lanczos algorithm will be used. If False, the Wiedemann algorithm will be used. No matter its value, if gaussian_pivot is True then gaussian elimination will be performed.
+- FLAG_LANCZOS: If True, the block Lanczos algorithm will be used. If False, the Wiedemann algorithm will be used. No matter its value, if gaussian_pivot is True then gaussian elimination will be performed.
 
-- square_root_couveignes: If True, the Couveignes algorithm is run for the square root step. It requires many primes to be inert. If False, the lifting algorithm is used
+- FLAG_SQUARE_ROOT_COUVEIGNES: If True, the Couveignes algorithm is run for the square root step. It requires many primes to be inert. If False, the lifting algorithm is used
 
-- large_primes_constant: Define the constant that will be multiplied by the last prime in the factor base to obtain the bound for the single large primes. For the double large primes, the bound is this constant multiplied by the last prime in the factor base squared. Both the algebraic and rational sides have the same bounds.
+- LARGE_PRIME_CONST: Define the constant that will be multiplied by the last prime in the factor base to obtain the bound for the single large primes. For the double large primes, the bound is this constant multiplied by the last prime in the factor base squared. Both the algebraic and rational sides have the same bounds.
 
-- block_size: If Block Lanczos or Wiedemann algorithm are used, this sets the block size. In the Wiedemann algorithm, this is only used to compute many matrix-vector products at once, and not to compute the matrix generator of the matrix sequence you obtain.
+- BLOCK_SIZE: If Block Lanczos or Wiedemann algorithm are used, this sets the block size. In the Wiedemann algorithm, this is only used to compute many matrix-vector products at once, and not to compute the matrix generator of the matrix sequence you obtain.
 
-- poly_search_nb_poly_coarse_eval: number of polynomials to be generated before doing precise ranking.
+- NB_POLY_COARSE_EVAL: number of polynomials to be generated before doing precise ranking.
 
-- poly_search_nb_poly_precise_eval: number of polynomials to be kept for precise evaluation.
+- NB_POLY_PRECISE_EVAL: number of polynomials to be kept for precise evaluation.
 
-- poly_search_prime_bound: maximum size of primes used in the polynomial generation
+- PRIME_BOUND: maximum size of primes used in the polynomial generation
 
-- poly_search_nb_roots: number of roots to use in the Kleinjung polynomial generation algorithm. It is the l parameter in the original paper.
+- NB_ROOTS: number of roots to use in the Kleinjung polynomial generation algorithm. It is the l parameter in the original paper.
 
-- poly_search_multiplier: leading coefficient of generated polynomials is always a multiple of this multiplier.
+- MULTIPLIER: leading coefficient of generated polynomials is always a multiple of this multiplier.
 
 - NB_CPU_POLY_SELECTION: Sets the number of cpu used for running polynomial search. One cpu is always kept as a "leader" that collect polynomial candidates from the workers.
 

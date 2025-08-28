@@ -2,7 +2,6 @@
 
 from utils import invmod
 from polynomial_functions import *
-import time
 
 def find_cycle_fp(graph, init):
     if init[0] == 1: return DFS_fp(graph, init)

@@ -11,6 +11,7 @@ import parse_config
 from utils import *
 from polynomial_functions import *
 from generate_primes import *
+import utils_polynomial_selection
 import mono_cpu_polynomial_selection
 import multi_cpu_polynomial_selection
 import mono_cpu_sieve
@@ -87,7 +88,7 @@ def NFS(n):
     FLAG_GAUSSIAN_PIVOT = parameters[1].lower() in ["true"]
     FLAG_LANCZOS = parameters[2].lower() in ["true"]
     FLAG_SQUARE_ROOT_COUVEIGNES = parameters[3].lower() in ["true"]
-    CONST = int(parameters[4])
+    LARGE_PRIME_CONST = int(parameters[4])
     BLOCK_SIZE = int(parameters[5])
     NB_POLY_COARSE_EVAL = int(parameters[6])
     NB_POLY_PRECISE_EVAL = int(parameters[7])
@@ -107,7 +108,7 @@ def NFS(n):
 
     prod_primes = math.prod(primes)
         
-    const1, const2 = CONST*primes[-1], CONST*primes[-1]*primes[-1]
+    const1, const2 = LARGE_PRIME_CONST*primes[-1], LARGE_PRIME_CONST*primes[-1]*primes[-1]
     
     if NB_CPU_POLY_SELECTION == 1:
         f_x,m0,m1,tmp,_ = mono_cpu_polynomial_selection.poly_search(n, primes, NB_ROOTS, PRIME_BOUND, MULTIPLIER,
@@ -121,14 +122,14 @@ def NFS(n):
 
     log.write_log(LOG_PATH, "poly search completed, parameters : m0 = "+str(m0)+" ; m1 = "+str(m1)+" ; d = "+str(d)+"\n")
     
-    f_x, m0, M = mono_cpu_polynomial_selection.evaluate_polynomial_quality(f_x, B, m0, m1, primes, LOG_PATH)
+    f_x, m0, M = utils_polynomial_selection.evaluate_polynomial_quality(f_x, B, m0, m1, primes, LOG_PATH)
     
     leading_coeff = f_x[0]
     zeros_f = get_complex_roots(f_x)
     zeros = [leading_coeff*i for i in zeros_f]
     f_prime = get_derivative(f_x)
     
-    g = [1,f_x[1]]
+    g = [1, f_x[1]]
     for i in range(2, len(f_x)): g.append(f_x[i]*pow(leading_coeff, i-1))
     g_prime = get_derivative(g)
 
@@ -166,7 +167,7 @@ def NFS(n):
     else:
         pairs_used, V = multi_cpu_sieve.find_relations(f_x, leading_coeff, g, primes, R_p, Q, B_prime, divide_leading,
                                                        prod_primes, pow_div, pairs_used, const1, const2, logs, m0, m1,
-                                                       M, FLAG_USE_BATCH_SMOOTH_TEST, LOG_PATH,NB_CPU_SIEVE)
+                                                       M, FLAG_USE_BATCH_SMOOTH_TEST, LOG_PATH, NB_CPU_SIEVE)
 
     print("")
     log.write_log(LOG_PATH, "sieving complete, building matrix...")

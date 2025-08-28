@@ -1,7 +1,7 @@
 # This file contains the functions that realize the sieve step when multiprocessing is on (NB_CPU > 1)
 
 from datetime import datetime
-import sys, os
+import sys
 import math
 import log
 import sieve
