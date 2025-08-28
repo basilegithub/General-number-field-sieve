@@ -171,11 +171,11 @@ def create_solution_couveignes(pairs, null_space, n, len_primes, primes, f_x, f_
 def compute_factors(pairs_used, vec, n, primes, g, g_prime, g_prime_sq, g_prime_eval, m0, m1, leading_coeff, d,
                     inert_set, zeros, delta, M, FLAG_SQUARE_ROOT_COUVEIGNES, time_1, LOG_PATH):
     if FLAG_SQUARE_ROOT_COUVEIGNES:
-        x,y = create_solution_couveignes(pairs_used, vec, n, len(primes), primes, g, g_prime, m0, m1, g_prime_sq,
+        x, y = create_solution_couveignes(pairs_used, vec, n, len(primes), primes, g, g_prime, m0, m1, g_prime_sq,
                                          leading_coeff, g_prime_eval, d, inert_set, zeros, delta, M<<1)
     
     else:
-        x,y = create_solution(pairs_used, vec, n, len(primes), primes, g, m0, m1, inert_set[-1], g_prime_sq,
+        x, y = create_solution(pairs_used, vec, n, len(primes), primes, g, m0, m1, inert_set[-1], g_prime_sq,
                               leading_coeff, g_prime_eval, M<<1, LOG_PATH)
 
     if x != y and math.gcd(x-y, n) != 1 and math.gcd(x+y, n) != 1:
